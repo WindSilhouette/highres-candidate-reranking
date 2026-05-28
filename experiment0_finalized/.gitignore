@@ -1,0 +1,74 @@
+# Python bytecode / caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+.env
+.env.*
+
+# OS / editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Data directories
+# Keep large/raw datasets out of Git. Use Colab/Drive/Kaggle download scripts instead.
+data/
+datasets/
+raw_data/
+processed_data/
+
+# Experiment outputs
+outputs/*
+!outputs/.gitkeep
+detector_outputs/*
+!detector_outputs/.gitkeep
+runs/
+logs/
+wandb/
+
+# Model checkpoints / embeddings / arrays
+*.pt
+*.pth
+*.ckpt
+*.onnx
+*.npz
+*.npy
+*.pkl
+*.joblib
+*.h5
+*.hdf5
+
+# Generated plots / media / archives
+*.png
+*.jpg
+*.jpeg
+*.webp
+*.pdf
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.gz
+
+# Allow notebooks and docs even if they contain output references
+!notebooks/*.ipynb
+!README.md
+!requirements.txt
+!configs/*.yaml
+
+# Credentials
+kaggle.json
+secrets.json
+*.key
+*.pem

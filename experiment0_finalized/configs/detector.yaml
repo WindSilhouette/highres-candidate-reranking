@@ -1,0 +1,73 @@
+candidate_export:
+  candidates_csv: detector_outputs/candidate_crops.csv
+  crop_size:
+  - 64
+  - 64
+  crops_dir: detector_outputs/crops
+  fp_taxonomy_csv: detector_outputs/fp_taxonomy.csv
+  threshold: 0.1
+data:
+  class_names:
+  - lesion
+  coco_json_path: null
+  csv_path: null
+  image_root: null
+  mode: toy
+  output_dir: detector_outputs
+evaluation:
+  iou_thresh_match: 0.3
+  metrics_path: detector_outputs/detector_metrics.json
+  operating_threshold: 0.1
+  predictions_path: detector_outputs/predictions.csv
+  threshold_sweep_path: detector_outputs/threshold_sweep.csv
+  thresholds:
+  - 0.05
+  - 0.1
+  - 0.3
+  - 0.5
+  - 0.7
+experiment:
+  device: cpu
+  name: stage1_detector_baseline
+  seed: 42
+interpretability:
+  gallery_dir: detector_outputs/galleries
+  n_gallery_images: 8
+  plots_dir: detector_outputs/plots
+  umap_n_components: 2
+  umap_n_neighbors: 10
+  use_tsne: false
+  use_umap: false
+model:
+  checkpoint_dir: detector_outputs/checkpoints
+  detections_per_img: 20
+  name: fasterrcnn_mobilenet_v3_large_fpn
+  nms_thresh: 0.3
+  num_classes: 2
+  pretrained_backbone: false
+  score_thresh_eval: 0.01
+  score_thresh_train: 0.05
+toy:
+  annotations_csv: detector_outputs/toy_annotations.csv
+  image_h: 96
+  image_w: 96
+  lesion_radius_max: 28
+  lesion_radius_min: 8
+  lesions_per_image_max: 3
+  lesions_per_image_min: 1
+  n_images: 20
+  n_patients: 8
+  output_dir: detector_outputs/toy_images
+  test_frac: 0.15
+  train_frac: 0.7
+  val_frac: 0.15
+training:
+  batch_size: 1
+  checkpoint_path: detector_outputs/checkpoints/detector_best.pt
+  epochs: 2
+  eval_every: 3
+  grad_clip: 5.0
+  lr: 0.001
+  lr_gamma: 0.1
+  lr_step_size: 8
+  weight_decay: 0.0005

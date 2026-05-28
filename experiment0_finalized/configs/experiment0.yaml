@@ -1,0 +1,92 @@
+# ── Experiment 0 Configuration ───────────────────────────────────────────────
+# Second-stage contextual reranking for false-positive control
+# Isolates reranking problem from full detection pipeline
+
+experiment:
+  name: "experiment0_reranking"
+  seed: 42
+  device: "cpu"          # change to "cuda" when GPU is available
+
+# ── Data ─────────────────────────────────────────────────────────────────────
+data:
+  mode: "toy"            # "toy" or "real"
+  csv_path: null         # set to your SLICE-3D metadata CSV when using real
+  image_root: null       # root directory for images (real mode only)
+  embedding_dim: 128     # toy mode embedding dimension
+  output_dir: "outputs"
+
+# ── Toy dataset generation ────────────────────────────────────────────────────
+toy:
+  n_patients: 200
+  lesions_per_patient_min: 3
+  lesions_per_patient_max: 20
+  malignant_rate: 0.12   # fraction of patients that have >= 1 malignant lesion
+  malignant_per_patient: 1
+  embedding_dim: 128
+  patient_spread: 2.0    # how spread patient centroids are in embedding space
+  benign_noise: 0.4      # std of benign lesions around patient centroid
+  malignant_shift: 1.8   # how far malignant lesion is shifted from centroid
+  malignant_noise: 0.3   # std of malignant lesion around its shifted position
+  output_csv: "outputs/toy_dataset.csv"
+  output_embeddings: "outputs/toy_embeddings.npy"
+
+# ── Splitting ─────────────────────────────────────────────────────────────────
+split:
+  train_frac: 0.70
+  val_frac:   0.15
+  test_frac:  0.15
+  split_col: "split"     # column name written into CSV
+  report_path: "outputs/split_report.txt"
+
+# ── Classifier (baseline) ─────────────────────────────────────────────────────
+classifier:
+  # toy mode: MLP on frozen embeddings
+  # real mode: ResNet50 or efficientnet_b0
+  backbone: "mlp"        # "mlp" | "resnet50" | "efficientnet_b0"
+  hidden_dim: 256
+  dropout: 0.3
+  lr: 0.001
+  weight_decay: 0.0001
+  epochs: 40
+  batch_size: 64
+  early_stopping_patience: 8
+  checkpoint_path: "outputs/classifier_best.pt"
+  embeddings_path: "outputs/embeddings.npz"  # stores logits, probs, embeddings
+
+# ── Calibration ───────────────────────────────────────────────────────────────
+calibration:
+  method: "temperature"  # "temperature" | "platt"
+  calibrated_path: "outputs/calibrated_probs.npz"
+  report_path: "outputs/calibration_report.json"
+
+# ── Rerankers ─────────────────────────────────────────────────────────────────
+rerankers:
+  # CARD ablations — must all be run
+  card_variants:
+    - "abs_only"
+    - "rel_only"
+    - "abs_rel"
+    - "abs_rel_conflict"
+  card_hidden: 32        # keep small
+  card_lr: 0.0005
+  card_epochs: 30
+  card_checkpoint_dir: "outputs/card_checkpoints"
+
+  toar_lite_lr: 0.0005
+  toar_lite_epochs: 30
+  toar_lite_hidden: 64
+  toar_lite_checkpoint: "outputs/toar_lite_best.pt"
+
+  set_transformer_heads: 2
+  set_transformer_layers: 2
+  set_transformer_lr: 0.0005
+  set_transformer_epochs: 30
+  set_transformer_checkpoint: "outputs/set_transformer_best.pt"
+
+# ── Metrics ───────────────────────────────────────────────────────────────────
+metrics:
+  k_values: [1, 3, 5, 10, 15]
+  sensitivity_targets: [0.80, 0.90]   # for NNT calculation
+  results_path: "outputs/metrics.json"
+  predictions_path: "outputs/predictions.csv"
+  plots_dir: "outputs/plots"
