@@ -1,0 +1,77 @@
+# =============================================================================
+# slice3d_embedding_baseline.yaml
+# Canonical configuration of record for experiment1_contextual_lesion_prioritization.
+#
+# NOTE: lesion_baseline.py is driven by command-line flags (see the run_*.sh
+# scripts), not by this file. This YAML documents the agreed settings so the
+# experiment is reproducible and reviewable; the shell scripts mirror it.
+# =============================================================================
+
+experiment:
+  name: experiment1_contextual_lesion_prioritization
+  question: >
+    Does patient-context lesion prioritization improve top-k malignant lesion
+    retrieval under a limited clinician review budget, using real lesion
+    embeddings?
+  stage: baseline            # non-parametric / linear; no transformer, no DL, no plots
+
+data:
+  # produced by prepare_embedding_csv.py
+  metadata_csv: ../data/processed/slice3d_subset.csv
+  embeddings_npy: ../data/processed/raw_embeddings.npy
+  prepared_csv: data/lesions_embeddings.csv
+  columns:
+    patient_id_col: patient_id
+    lesion_id_col: lesion_id        # falls back to isic_id, then generated
+    label_col: malignant            # 0/1 after mapping from metadata 'target'
+    embedding_prefix: emb_
+
+split:
+  type: patient_disjoint            # stratified by malignant patient; leakage-asserted
+  val_frac: 0.20
+  test_frac: 0.20
+  primary_seed: 42
+  multiseed: [1, 2, 3, 4, 5]
+
+model:
+  classifier: logreg                # class_weight=balanced; single-class-guarded
+  context_methods: [centroid, cosine_centroid, knn]
+  context_k: 5
+  min_lesions_for_context: 2
+  fusion:
+    rule: "combined = w*classifier_norm + (1-w)*context_norm"  # w = classifier weight
+    normalizer: minmax_fit_on_train  # non-transductive; fit on train, applied to val/test
+    weight_grid: [0.0, 0.1, 0.25, 0.5, 0.75, 0.9, 1.0]
+    select_on: validation
+    select_metric: "recall@3"        # tie-break: lower mean rank of first malignant
+
+evaluation:
+  primary_metrics:                   # patient-level, over malignant patients
+    - recall@1
+    - recall@3
+    - recall@5
+    - mean_rank_first_malignant
+    - mean_NNR_to_first_malignant            # number-needed-to-review
+    - mean_percentile_rank_first_malignant   # lesion-count-normalized rank proxy
+  secondary_metrics:                 # lesion-level, references only
+    - auroc
+    - auprc
+  comparison_methods: [classifier_only, context_only, combined, random]
+  bootstrap:
+    unit: patient                    # resample patients, not lesions
+    debug_iters: 50
+    full_iters: 1000
+    multiseed_iters: 300
+    ci_alpha: 0.05
+  random_baseline_seeds:
+    debug: 50
+    full: 200
+    multiseed: 100
+
+constraints:
+  - patient_disjoint_splits_only
+  - top_k_metrics_are_primary
+  - auroc_auprc_secondary_only
+  - no_transformer_or_deep_architecture
+  - no_plots_yet
+  - do_not_change_research_direction
