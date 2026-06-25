@@ -1,0 +1,59 @@
+# =============================================================================
+# Experiment 2 - SLICE-3D patient-context fusion ranking
+# =============================================================================
+# Every key here can be overridden on the command line (see context_fusion_ranking.py).
+# Paths are resolved relative to the directory you run the script from.
+
+# --- data --------------------------------------------------------------------
+data_csv: ../experiment1_contextual_lesion_prio/data/lesions_embeddings.csv
+patient_id_col: patient_id
+lesion_id_col: lesion_id
+label_col: malignant
+embedding_prefix: emb_
+
+# If the real CSV is absent you can still smoke-test the whole pipeline by
+# setting use_synthetic_data: true (generates a SLICE-3D-shaped toy set).
+use_synthetic_data: false
+
+# --- patient-disjoint split --------------------------------------------------
+val_frac: 0.20          # fraction of PATIENTS held out for validation
+test_frac: 0.20         # fraction of PATIENTS held out for test
+split_seed: 42
+
+# --- supervised classifier (first-stage lesion risk) -------------------------
+classifier: logreg      # logreg | mlp  (kept simple; no deep nets)
+mlp_hidden: [64]
+
+# --- context feature computation --------------------------------------------
+context_k: 5            # neighbours for kNN-within-patient features
+min_lesions_for_context: 2
+use_isolation_forest: true   # optional sklearn IsolationForest outlier feature
+use_lof: true                # optional sklearn LocalOutlierFactor feature
+
+# --- methods to compare ------------------------------------------------------
+methods:
+  - random
+  - classifier_only
+  - context_only
+  - manual_fusion
+  - learned_fusion_logreg
+  - learned_fusion_mlp     # optional; remove to skip
+
+# --- manual fusion weight sweep (classifier vs context), tuned on VAL --------
+weight_grid: [0.0, 0.25, 0.5, 0.75, 1.0]
+
+# --- evaluation --------------------------------------------------------------
+topk_values: [1, 3, 5, 10]
+selection_metric: "recall@5"   # used to pick best method + manual-fusion weight on VAL
+
+# --- statistical comparison --------------------------------------------------
+n_bootstrap: 1000       # paired patient-level bootstrap resamples (debug: 50)
+
+# --- output ------------------------------------------------------------------
+output_dir: results/seed_42
+
+# --- synthetic generator (only used when use_synthetic_data: true) -----------
+syn_n_patients: 509
+syn_embed_dim: 64       # smaller than 2048 so smoke tests stay fast
+syn_malignant_patient_frac: 0.5
+syn_mean_lesions: 23

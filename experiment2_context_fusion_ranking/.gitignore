@@ -1,0 +1,16 @@
+# Do NOT commit data or results for Experiment 2.
+data/
+results/
+# keep the empty results/ tracked so the folder exists on checkout
+!results/.gitkeep
+
+# large / binary artefacts
+*.npy
+*.npz
+*.zip
+*.h5
+*.hdf5
+
+# python
+__pycache__/
+*.pyc
