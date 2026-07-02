@@ -1,0 +1,20 @@
+# Template for SLICE-3D / ISIC 2024 HDF5 runs. Edit paths or override in notebook.
+run_mode: MEDIUM
+paths:
+  metadata_csv: /content/highres/isic-2024-challenge/train-metadata.csv
+  hdf5: /content/highres/isic-2024-challenge/train-image.hdf5
+  image_dir: null
+  work_dir: artifacts_slice3d
+  results_dir: results_slice3d
+data:
+  id_col: isic_id
+  patient_col: patient_id
+  target_col: target
+  image_path_col: null
+embedding:
+  model: efficientnet_b0
+  use_dino: false
+  batch_size: 96
+subset:
+  max_lesions: 75000
+  max_patients: null

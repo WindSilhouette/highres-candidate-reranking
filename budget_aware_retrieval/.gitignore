@@ -1,0 +1,19 @@
+# Never commit data or results.
+artifacts/
+results/
+!results/.gitkeep
+data/
+*.npy
+*.npz
+*.zip
+*.h5
+*.hdf5
+*.parquet
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+artifacts_slice3d/
+artifacts_itobos/
+results_slice3d/
+results_itobos/
+*.format

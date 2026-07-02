@@ -1,0 +1,23 @@
+# Template for iToBoS/generic image-folder runs. Edit paths and data column names.
+run_mode: MEDIUM
+paths:
+  metadata_csv: /content/highres/itobos/metadata.csv
+  hdf5: null
+  image_dir: /content/highres/itobos/images
+  work_dir: artifacts_itobos
+  results_dir: results_itobos
+data:
+  # Change these if your CSV uses different names. The loader also auto-detects
+  # common aliases: patient_id/patient/subject_id, target/malignant/label, etc.
+  id_col: null
+  patient_col: null
+  target_col: null
+  image_path_col: null
+  positive_values: ["1", "true", "yes", "malignant", "melanoma", "cancer", "positive"]
+embedding:
+  model: efficientnet_b0
+  use_dino: false
+  batch_size: 96
+subset:
+  max_lesions: 75000
+  max_patients: null

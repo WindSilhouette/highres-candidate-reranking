@@ -1,0 +1,11 @@
+# SMOKE: ~12k lesions, fast end-to-end sanity of the whole engine.
+run_mode: SMOKE
+paths:
+  metadata_csv: null      # set to ISIC 2024 train-metadata.csv for real data
+  hdf5: null              # set to ISIC 2024 train-image.hdf5 for real embeddings
+  work_dir: artifacts
+  results_dir: results
+subset: {max_lesions: 12000, max_patients: null}
+embedding: {model: resnet50, use_dino: false, batch_size: 64, synthetic_dim: 64}
+seeds: [1, 2, 3, 4, 5, 42]
+eval: {n_bootstrap: 1000}
